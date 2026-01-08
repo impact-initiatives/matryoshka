@@ -4,8 +4,31 @@ sources:
     schema: kobo_dev
     tables:
       - name: kobo_asset
+        description: Central table in Kobotoolbox API. a.k.a. Project / Form
         columns:
           - name: uid
+            description: PK for assets
             data_tests:
               - unique
               - not_null
+      - name: kobo_asset_content
+        description: Bridge table for linking questions, choices, external choices and settings
+        columns:
+          - name: asset_uid
+            description: Foreign key to kobo_asset
+            data_tests:
+              - unique
+              - not_null
+          - name: _dlt_id
+            description: DLT record identifier
+          - name: _dlt_load_id
+            description: DLT load timestamp
+      - name: kobo_asset_content__survey
+        description: Form survey questions (nested table)
+        columns:
+          - name: _dlt_parent_id
+            description: Foreign key to kobo_asset_content._dlt_id
+          - name: _xpath
+            description: XPath location of question in form structure
+          - name: name
+            description: Question identifier/name
