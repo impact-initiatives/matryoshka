@@ -39,6 +39,14 @@ sources:
             data_tests:
               - unique
               - not_null
+          - name: _dlt_load_id
+            description: DLT load timestamp
+            data_tests:
+              - not_null
+          - name: deployment__last_submission_time
+            description: Last submission timestamp captured by Kobo (assets without submissions are not ingested)
+            data_tests:
+              - not_null
       - name: kobo_asset_content
         description: Bridge table for linking questions, choices, external choices and settings
         columns:
