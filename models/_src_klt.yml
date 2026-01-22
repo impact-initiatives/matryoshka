@@ -74,7 +74,3 @@ sources:
             description: XPath location of question in form structure
           - name: name
             description: Question identifier/name
-          - name: _dlt_load_id
-            description: DLT load timestamp
-            data_tests:
-              - not_null
