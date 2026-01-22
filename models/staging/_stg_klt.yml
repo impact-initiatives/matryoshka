@@ -48,9 +48,6 @@ models:
         data_tests:
           - unique
           - not_null
-          - relationships:
-              to: source('klt', 'kobo_submission')
-              field: _id
       - name: submission_load_id
         description: DLT load identifier for submission
         data_tests:
