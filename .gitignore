@@ -34,7 +34,8 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+!.env.template
 *.key
 *.pem
 credentials.json
-profiles.yml
+!profiles.yml
