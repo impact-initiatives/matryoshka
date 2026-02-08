@@ -74,3 +74,28 @@ sources:
             description: XPath location of question in form structure
           - name: name
             description: Question identifier/name
+      - name: kobo_audit_log
+        description: Kobo server audit log entries
+        columns:
+          - name: _dlt_id
+            description: DLT record identifier
+            data_tests:
+              - not_null
+          - name: _dlt_load_id
+            description: DLT load timestamp
+            data_tests:
+              - not_null
+          - name: date_created
+            description: Audit entry creation timestamp
+          - name: user_uid
+            description: User identifier
+          - name: username
+            description: Username
+          - name: action
+            description: Audit action
+          - name: metadata__asset_uid
+            description: Asset identifier in audit metadata
+          - name: metadata__uuid
+            description: Submission UUID in audit metadata
+          - name: log_type
+            description: Audit log category
