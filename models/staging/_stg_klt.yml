@@ -81,3 +81,33 @@ models:
         description: Timestamp of last submission (UTC)
       - name: count_submissions
         description: Total submissions recorded
+  - name: stg_klt__kobo_audit_log__submission_management
+    description: Kobo Server Audit Logs
+    columns:
+      - name: loaded_at
+        description: Loaded time (UTC)
+        data_tests:
+          - not_null
+      - name: audit_load_id
+        data_tests:
+          - not_null
+          - unique
+      - name: created_at
+        description: Audit Entry Creation Time (UTC)
+        data_tests:
+          - not_null
+      - name: user_id
+        data_tests:
+          - not_null
+      - name: user_name
+        data_tests:
+          - not_null
+      - name: action
+        data_tests:
+          - not_null
+      - name: asset_id
+        data_tests:
+          - not_null
+      - name: submission_uuid
+        data_tests:
+          - not_null
