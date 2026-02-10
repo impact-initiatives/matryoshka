@@ -21,4 +21,5 @@ SELECT
 FROM
     src
 WHERE
-    log_type = 'submission-management'
+    log_type = 'submission-management' OR 
+    log_type = 'project-history'
