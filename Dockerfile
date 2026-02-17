@@ -1,9 +1,14 @@
-FROM ghcr.io/dbt-labs/dbt-postgres:1.11.latest
+FROM python:3.13-slim
 
 WORKDIR /usr/app
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+COPY pyproject.toml uv.lock /usr/app/
+RUN uv sync --frozen --no-dev
+
 COPY . /usr/app
 
-RUN dbt deps
+RUN uv run dbt deps
 
-CMD ["build"]
+CMD ["uv", "run", "dbt", "build"]
