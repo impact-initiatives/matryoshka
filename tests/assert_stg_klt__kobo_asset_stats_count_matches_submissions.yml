@@ -1,0 +1,8 @@
+data_tests:
+  - name: assert_stg_klt__kobo_asset_stats_count_matches_submissions
+    description: >
+      Compares computed submission counts from `stg_klt__kobo_submission` to observed counts in
+      `stg_klt__kobo_asset_stats` using a left join on `asset_id`. The test fails when
+      `observed_count_submissions` is null, or when `computed_count_submissions` is strictly smaller than
+      `observed_count_submissions` for assets whose oldest submission is within the last year. This test is
+      intentionally focused on undercounting and does not evaluate assets present only in observed stats.
