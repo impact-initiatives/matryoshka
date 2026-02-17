@@ -1,0 +1,76 @@
+data_tests:
+  - name: assert_last_submission_consistency
+    description: |
+      Verifies that the last submission timestamp reported by the Kobo asset
+      stats endpoint is consistent with the actual submission records ingested
+      into the warehouse, accounting for deletions and audit log retention
+      limits.
+
+      ## Context
+
+      Two sources report when the last submission occurred for a given asset:
+      - `stg_klt__kobo_submission`: the actual submission records ingested by
+        the pipeline (computed source of truth)
+      - `stg_klt__kobo_asset_stats`: a metadata endpoint maintained by Kobo
+        that caches the last submission timestamp (observed value)
+
+      These two sources can legitimately diverge when submissions are deleted
+      on Kobo after the stats endpoint cached their timestamp, or when the
+      stats endpoint has not yet refreshed after a late-arriving submission.
+      The audit log in `stg_klt__kobo_audit_log__submission_management` is
+      used to distinguish explainable divergence from genuine anomalies.
+
+      ## Assumptions
+
+      1. The Kobo stats endpoint does not automatically recalculate
+         `last_submission_at` after a submission is deleted, meaning deletions
+         will always produce a temporary or permanent divergence between the
+         two sources.
+      2. Audit log events older than 1 year are not guaranteed to be ingested.
+         A missing deletion record for an old discrepancy is therefore not
+         considered suspicious.
+      3. The most recent deletion event per asset is used as a proxy for
+         whether a deletion explains the divergence. This assumes deletions
+         are the primary driver of discrepancies, not submission edits or
+         other mutation events.
+      4. Bulk deletions (`delete-submission` action) may not carry a
+         `submission_uuid`, but are still valid explanatory events and are
+         included via the `LIKE '%delete%'` filter.
+
+      ## Happy path (test returns zero rows)
+
+      A discrepancy between computed and observed is considered explained, and
+      the row is silenced, when any of the following hold:
+
+      - `computed > observed` and the most recent deletion postdates the
+        observed timestamp: a submission was deleted after Kobo cached the
+        stat, so our warehouse correctly holds newer data.
+      - `computed > observed` and the observed timestamp is older than 1 year:
+        the discrepancy is too old for audit log coverage, a deletion is
+        assumed.
+      - `computed < observed` and the most recent deletion postdates the
+        observed timestamp: the submission that pushed the stat forward was
+        deleted before ingestion, so the gap is expected.
+
+      ## Failure path (test returns one or more rows)
+
+      A row is returned, and the test fails, when divergence cannot be
+      explained by the audit log:
+
+      - `computed < observed` with no deletion on record, or with the most
+        recent deletion predating the observed timestamp: the pipeline appears
+        to be missing submissions that Kobo still considers present.
+      - `computed > observed` within the past year with no deletion on record,
+        or with the most recent deletion predating the observed timestamp: the
+        warehouse holds submissions that the stats endpoint does not account
+        for, and no deletion explains why.
+
+      In both failure cases, the recommended investigation steps are:
+      1. Check whether the affected asset had recent ingestion errors in the
+         pipeline logs.
+      2. Query the audit log directly for the asset to look for non-delete
+         mutation events (edits, validation changes) that may have altered
+         submission timestamps.
+      3. Check whether the discrepancy resolves itself on the next pipeline
+         run, which would indicate a transient stats cache lag rather than
+         a structural issue.
