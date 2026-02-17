@@ -16,10 +16,21 @@ SELECT
     user_uid AS user_id,
     username AS user_name,
     action,
-    metadata__asset_uid AS asset_id,
-    metadata__uuid AS submission_uuid
+    COALESCE(
+        metadata__asset_uid,
+        metadata__asset_file__uid
+    ) AS asset_id,
+    COALESCE(
+	metadata__submission__root_uuid,
+        metadata__instance__root_uuid,
+        metadata__uuid
+    ) AS submission_uuid,
+    metadata__ip_address AS device_ip_address
 FROM
     src
 WHERE
-    log_type = 'submission-management' OR 
-    log_type = 'project-history'
+    metadata__submission__root_uuid IS NOT NULL
+    OR metadata__instance__root_uuid IS NOT NULL
+    OR metadata__submission__status IS NOT NULL
+    OR metadata__submission__submitted_by IS NOT NULL
+    OR metadata__uuid IS NOT NULL
