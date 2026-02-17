@@ -1,5 +1,5 @@
 data_tests:
-  - name: assert_last_submission_consistency
+  - name: assert_stg_klt__kobo_asset_stats_last_submission_matches_submissions
     description: |
       Verifies that the last submission timestamp reported by the Kobo asset
       stats endpoint is consistent with the actual submission records ingested
